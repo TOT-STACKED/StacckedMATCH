@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0F0F0F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="StackMatch">
+  <meta name="description" content="Find your hospitality tech stack. Swipe through tools matched to your EPOS and your biggest operational problem.">
+
+  <title>StackMatch — Find your hospitality tech stack</title>
+
+  <!-- OG -->
+  <meta property="og:title"       content="StackMatch">
+  <meta property="og:description" content="Tinder for your tech stack. Matched to your EPOS.">
+  <meta property="og:type"        content="website">
+  <meta property="og:image"       content="/public/og.png">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/public/icons/icon-192.png">
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════════════════════════
+       HEADER
+  ═══════════════════════════════════ -->
+  <header class="app-header">
+    <a href="/" class="logo">Stack<span>Match</span></a>
+    <button class="btn-icon" onclick="openAuthModal()" title="Account" aria-label="Account">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- ═══════════════════════════════════
+       PAGE: DISCOVER (main swipe flow)
+  ═══════════════════════════════════ -->
+  <main class="page active" id="page-discover">
+
+    <!-- Progress dots (shared across discover screens) -->
+    <div class="progress-dots">
+      <div class="dot active" id="dot-1"></div>
+      <div class="dot"        id="dot-2"></div>
+      <div class="dot"        id="dot-3"></div>
+    </div>
+
+    <!-- ── SCREEN: Problem ── -->
+    <div class="discover-screen active" id="screen-problem">
+      <span class="t-label">Step 1 of 3</span>
+      <h1 class="t-display mt-8">What's keeping you up at night?</h1>
+      <p class="t-body mt-8">Pick your biggest operational headache. We'll build your stack around it.</p>
+
+      <div class="problem-grid mt-24" id="problem-grid">
+        <!-- Injected by app.js -->
+      </div>
+
+      <button class="btn" id="btn-to-pos" onclick="goToPos()" disabled>
+        Show me my options
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ── SCREEN: POS ── -->
+    <div class="discover-screen" id="screen-pos">
+      <span class="t-label">Step 2 of 3</span>
+      <h1 class="t-display mt-8">What's your EPOS?</h1>
+      <p class="t-body mt-8">We'll only show tools that actually integrate with it.</p>
+
+      <div class="pos-list mt-24" id="pos-list">
+        <!-- Injected by app.js -->
+      </div>
+
+      <button class="btn" id="btn-to-swipe" onclick="goToSwipe()" disabled>
+        Build my stack
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+
+      <button class="btn-ghost mt-8" onclick="showScreen('problem')">← Back</button>
+    </div>
+
+    <!-- ── SCREEN: Swipe ── -->
+    <div class="discover-screen" id="screen-swipe">
+      <div class="swipe-meta">
+        <span class="swipe-context-label" id="swipe-context-label">Matched to your problem &amp; EPOS</span>
+        <span class="swipe-counter" id="swipe-counter">1 of 6</span>
+      </div>
+
+      <!-- Card arena -->
+      <div class="swipe-arena" id="swipe-arena">
+        <!-- Cards injected by SwipeEngine -->
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-btns mt-8">
+        <button class="action-btn undo"  onclick="swipeUndo()"  title="Undo" aria-label="Undo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7v6h6"/><path d="M3 13C5.33 6.5 12.5 3 19 7c3 1.9 5 5 5 9"/></svg>
+        </button>
+        <button class="action-btn nope"  onclick="swipeLeft()"  title="Not for me" aria-label="Pass">✕</button>
+        <button class="action-btn yep"   onclick="swipeRight()" title="Worth a look" aria-label="Like">✓</button>
+        <button class="action-btn skip"  onclick="navigateTo('discover')" title="Start over" aria-label="Start over">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+
+      <p class="t-micro text-center mt-12">Drag the card or use the buttons &nbsp;·&nbsp; ✓ like &nbsp;·&nbsp; ✕ pass</p>
+    </div>
+
+    <!-- ── SCREEN: Results ── -->
+    <div class="discover-screen" id="screen-results">
+      <div class="results-hero">
+        <span class="results-icon" id="results-icon">🎯</span>
+        <h2 class="t-heading" id="results-title">Your shortlist</h2>
+        <p class="t-body mt-8" id="results-sub">Matched to your problem and EPOS</p>
+      </div>
+
+      <div class="result-list" id="results-list"></div>
+
+      <!-- Share section (hidden until session created) -->
+      <div id="share-section" class="hidden">
+        <div class="share-card">
+          <p class="t-label mb-8">Share this stack</p>
+          <p class="t-small">Send this link to a colleague or save it for later.</p>
+          <div class="share-url" id="share-url-display"></div>
+        </div>
+        <div class="flex gap-8">
+          <button class="btn" style="flex:1" onclick="nativeShare()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Share
+          </button>
+          <button class="btn-ghost" style="flex:1" onclick="copyShareLink()">Copy link</button>
+        </div>
+      </div>
+
+      <button class="btn-ghost mt-16" onclick="goBackToProblem()">Start again with a different problem</button>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════════════════════
+       PAGE: SHARED STACK VIEW
+  ═══════════════════════════════════ -->
+  <main class="page" id="page-shared">
+    <span class="t-label mt-32">Shared stack</span>
+    <h2 class="t-heading mt-8">Someone sent you a shortlist</h2>
+
+    <div class="flex gap-8 mt-16 mb-24">
+      <div class="history-item" style="flex:1;margin:0">
+        <div class="history-problem" id="shared-problem">—</div>
+        <div class="history-pos" id="shared-pos">—</div>
+      </div>
+    </div>
+
+    <div class="result-list" id="shared-list"></div>
+
+    <button class="btn mt-16" onclick="goBackToProblem(); showPage('discover');">Build my own stack →</button>
+  </main>
+
+  <!-- ═══════════════════════════════════
+       PAGE: HISTORY
+  ═══════════════════════════════════ -->
+  <main class="page" id="page-history">
+    <span class="t-label mt-32">Match history</span>
+    <h2 class="t-heading mt-8">Your past sessions</h2>
+    <div id="history-content" class="mt-24">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════
+       PAGE: ACCOUNT
+  ═══════════════════════════════════ -->
+  <main class="page" id="page-account">
+    <span class="t-label mt-32">Account</span>
+    <h2 class="t-heading mt-8">Your profile</h2>
+    <div id="account-content" class="mt-24"></div>
+  </main>
+
+  <!-- ═══════════════════════════════════
+       PAGE: VENDOR PORTAL
+  ═══════════════════════════════════ -->
+  <main class="page" id="page-vendor">
+    <span class="t-label mt-32">Vendor portal</span>
+    <h2 class="t-heading mt-8">Manage your listing</h2>
+    <div id="vendor-portal-content" class="mt-24">
+      <div class="empty"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════
+       BOTTOM NAV
+  ═══════════════════════════════════ -->
+  <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+    <button class="nav-item active" data-page="discover" onclick="navigateTo('discover')" aria-label="Discover">
+      <span class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </span>
+      <span class="nav-label">Discover</span>
+    </button>
+
+    <button class="nav-item" data-page="history" onclick="navigateTo('history')" aria-label="History">
+      <span class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </span>
+      <span class="nav-label">History</span>
+    </button>
+
+    <button class="nav-item" data-page="account" onclick="navigateTo('account')" aria-label="Account">
+      <span class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </span>
+      <span class="nav-label">Account</span>
+    </button>
+
+    <button class="nav-item" data-page="vendor" onclick="navigateTo('vendor')" aria-label="Vendors">
+      <span class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </span>
+      <span class="nav-label">Vendors</span>
+    </button>
+  </nav>
+
+</div><!-- /app-shell -->
+
+
+<!-- ═══════════════════════════════════
+     MODAL: AUTH
+═══════════════════════════════════ -->
+<div class="modal-overlay" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal-sheet" role="dialog" aria-label="Sign in">
+    <div class="modal-handle"></div>
+    <h3 class="t-title mb-8">Sign in to StackMatch</h3>
+    <p class="t-small mb-24">Save your shortlists and request intros. No password needed.</p>
+
+    <div id="auth-form-area">
+      <div class="field mb-16">
+        <label for="auth-email">Your email</label>
+        <input type="email" id="auth-email" placeholder="you@yourvenue.com" autocomplete="email">
+      </div>
+      <button class="btn" id="btn-auth" onclick="submitAuth()">Send magic link</button>
+      <button class="btn-ghost mt-8" onclick="closeAuthModal()">Not now</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     MODAL: INTRO REQUEST
+═══════════════════════════════════ -->
+<div class="modal-overlay" id="intro-modal" onclick="if(event.target===this)closeIntroModal()">
+  <div class="modal-sheet" role="dialog" aria-label="Request intro">
+    <div class="modal-handle"></div>
+    <span class="t-label mb-4">Request an intro to</span>
+    <h3 class="t-title mb-16" id="intro-vendor-name">Vendor name</h3>
+    <input type="hidden" id="intro-vendor-id">
+
+    <div class="vendor-form" style="gap:12px">
+      <div class="field">
+        <label for="intro-email">Your email *</label>
+        <input type="email" id="intro-email" placeholder="you@yourvenue.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="intro-name">Your name</label>
+        <input type="text" id="intro-name" placeholder="First and last name" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="intro-venue">Your venue / group</label>
+        <input type="text" id="intro-venue" placeholder="The Crown Group">
+      </div>
+      <div class="field">
+        <label for="intro-message">Anything else? (optional)</label>
+        <textarea id="intro-message" rows="2" placeholder="We're a 12-site group looking to replace our current rota tool…"></textarea>
+      </div>
+    </div>
+
+    <button class="btn mt-16" id="btn-submit-intro" onclick="submitIntro()">Send intro request</button>
+    <button class="btn-ghost mt-8" onclick="closeIntroModal()">Cancel</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════
+     SERVICE WORKER REGISTRATION
+═══════════════════════════════════ -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(console.error);
+  }
+</script>
+
+<!-- ES modules -->
+<script type="module" src="/js/app.js"></script>
+
+</body>
+</html>
