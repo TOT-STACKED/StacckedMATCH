@@ -481,9 +481,12 @@ async function initSwipeScreen(){
   $('swipe-context').textContent=`${PLABELS[problemTag]} · ${POSLABELS[posSystem]}`;
   $('swipe-arena').innerHTML=`<div class="empty"><div class="spinner"></div></div>`;
   let q=sb.from('vendors').select('*').eq('is_active',true).contains('problem_tags',[problemTag]);
-  if(posSystem!=='other')q=q.or(`pos_integrations.cs.{${posSystem}},pos_integrations.cs.{other}`);
-  const{data:vendors,error}=await q.order('is_verified',{ascending:false});
-  if(error||!vendors||!vendors.length){$('swipe-arena').innerHTML=`<div class="empty"><span class="empty-icon">🤔</span><p class="t-body">No tools found for this combo yet.</p></div>`;return;}
+  // Filter by POS — fetch all then filter client-side (array overlap not supported in anon RLS)
+  // posSystem filtering happens after fetch
+  const{data:allV,error}=await q.order('is_verified',{ascending:false});
+  if(error||!allV||!allV.length){$('swipe-arena').innerHTML=`<div class="empty"><span class="empty-icon">🤔</span><p class="t-body">No tools found for this combination yet.</p></div>`;return;}
+  const vendors=posSystem==='other'?allV:allV.filter(v=>{const pi=v.pos_integrations||[];return pi.includes(posSystem)||pi.includes('other');});
+  if(!vendors.length){$('swipe-arena').innerHTML=`<div class="empty"><span class="empty-icon">🤔</span><p class="t-body">No tools matched your EPOS yet — try 'Something else'.</p></div>`;return;}
   const{data:session}=await sb.from('swipe_sessions').insert({operator_id:state.user?.id||null,session_key:state.session.key,problem_tag:problemTag,pos_system:posSystem}).select().single();
   if(session){state.session.id=session.id;state.session.shareToken=session.share_token;}
   state.swipe={vendors,currentIndex:0,liked:[],history:[]};
